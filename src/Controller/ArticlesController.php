@@ -16,27 +16,27 @@ use Symfony\Component\Routing\Annotation\Route;
 class ArticlesController extends AbstractController
 {
 
-    // /**
-    //  * @Route("/articles/{id}", name="article_show")
-    //  */
-    // public function showAction(Articles $article)
-    // {
-    //     $data = $this->get('jms_serializer')->serialize($article, 'json');
+    /**
+     * @Route("/show/{id}", name="article_show")
+     */
+    public function showAction(Articles $article)
+    {
+        $data = $this->get('jms_serializer')->serialize($article, 'json');
 
-    //     $response = new Response($data);
-    //     $response->headers->set('Content-Type', 'application/json');
+        $response = new Response($data);
+        $response->headers->set('Content-Type', 'application/json');
 
-    //     return $response;
-    // }
+        return $response;
+    }
 
     /**
      * @Route("/create", name="article_create", methods={"POST"})
      */
     public function createAction(Request $request)
     {
-        dd("ok");
+        // dd("ok");
         $data = $request->getContent();
-        $article = $this->get('jms_serializer')->deserialize($data, 'AppBundle\Entity\Article', 'json');
+        $article = $this->get('jms_serializer')->deserialize($data, 'App\Entity\Article', 'json');
 
         $em = $this->getDoctrine()->getManager();
         $em->persist($article);
