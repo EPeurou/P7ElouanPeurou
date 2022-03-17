@@ -39,18 +39,12 @@ class UserController extends AbstractController
     public function new(Request $request, UserRepository $userRepository): Response
     {
         $user = new User();
-        $form = $this->createForm(UserType::class, $user);
-        $form->handleRequest($request);
+        $data = $request->getContent();
+        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+        $user = $serializer->deserialize($data, "App\Entity\User", "json");
+        $userRepository->add($user);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $userRepository->add($user);
-            return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->renderForm('user/new.html.twig', [
-            'user' => $user,
-            'form' => $form,
-        ]);
+        return new Response('', Response::HTTP_CREATED);
     }
 
     /**
