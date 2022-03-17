@@ -5,6 +5,11 @@ namespace App\Controller;
 use App\Entity\Articles;
 use App\Form\ArticlesType;
 use App\Repository\ArticlesRepository;
+// use JMS\Serializer\SerializerInterface;
+// use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,14 +20,24 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ArticlesController extends AbstractController
 {
+    // public $serializer = new Serializer();
+
+    // public function __constructor($serializer)
+    // {
+    //     $this->serializer = $serializer;
+    // }
 
     /**
      * @Route("/show/{id}", name="article_show")
      */
     public function showAction(Articles $article)
     {
-        $data = $this->get('jms_serializer')->serialize($article, 'json');
-
+        // $serializer = $container->get('jms_serializer');
+        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+        $data = $serializer->serialize($article, "json");
+        // $data =  $this->get('serializer')->serialize($article, 'json');
+        // $data = $this->container->get('jms_serializer')->serialize($article, 'json');
+        // $data = json_encode($article);
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
 
@@ -50,9 +65,21 @@ class ArticlesController extends AbstractController
      */
     public function index(ArticlesRepository $articlesRepository): Response
     {
-        return $this->render('articles/index.html.twig', [
-            'articles' => $articlesRepository->findAll(),
-        ]);
+        $article = $articlesRepository->findAll();
+
+        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+        $data = $serializer->serialize($article, "json");
+        // $data =  $this->get('serializer')->serialize($article, 'json');
+        // $data = $this->container->get('jms_serializer')->serialize($article, 'json');
+        // $data = json_encode($article);
+        $response = new Response($data);
+        $response->headers->set('Content-Type', 'application/json');
+
+        return $response;
+
+        // return $this->render('articles/index.html.twig', [
+        //     'articles' => $articlesRepository->findAll(),
+        // ]);
     }
 
     /**
