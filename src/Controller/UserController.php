@@ -52,9 +52,12 @@ class UserController extends AbstractController
      */
     public function show(User $user): Response
     {
-        return $this->render('user/show.html.twig', [
-            'user' => $user,
-        ]);
+        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+        $data = $serializer->serialize($user, "json");
+        $response = new Response($data);
+        $response->headers->set('Content-Type', 'application/json');
+
+        return $response;
     }
 
     /**
