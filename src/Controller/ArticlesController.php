@@ -5,8 +5,6 @@ namespace App\Controller;
 use App\Entity\Articles;
 use App\Form\ArticlesType;
 use App\Repository\ArticlesRepository;
-// use JMS\Serializer\SerializerInterface;
-// use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -65,17 +63,10 @@ class ArticlesController extends AbstractController
 
         $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
         $data = $serializer->serialize($article, "json");
-        // $data =  $this->get('serializer')->serialize($article, 'json');
-        // $data = $this->container->get('jms_serializer')->serialize($article, 'json');
-        // $data = json_encode($article);
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
 
         return $response;
-
-        // return $this->render('articles/index.html.twig', [
-        //     'articles' => $articlesRepository->findAll(),
-        // ]);
     }
 
     // /**
