@@ -27,38 +27,38 @@ class ArticlesController extends AbstractController
     //     $this->serializer = $serializer;
     // }
 
-    /**
-     * @Route("/show/{id}", name="article_show")
-     */
-    public function showAction(Articles $article)
-    {
-        // $serializer = $container->get('jms_serializer');
-        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-        $data = $serializer->serialize($article, "json");
-        // $data =  $this->get('serializer')->serialize($article, 'json');
-        // $data = $this->container->get('jms_serializer')->serialize($article, 'json');
-        // $data = json_encode($article);
-        $response = new Response($data);
-        $response->headers->set('Content-Type', 'application/json');
+    // /**
+    //  * @Route("/show/{id}", name="article_show")
+    //  */
+    // public function showAction(Articles $article)
+    // {
+    //     // $serializer = $container->get('jms_serializer');
+    //     $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+    //     $data = $serializer->serialize($article, "json");
+    //     // $data =  $this->get('serializer')->serialize($article, 'json');
+    //     // $data = $this->container->get('jms_serializer')->serialize($article, 'json');
+    //     // $data = json_encode($article);
+    //     $response = new Response($data);
+    //     $response->headers->set('Content-Type', 'application/json');
 
-        return $response;
-    }
+    //     return $response;
+    // }
 
-    /**
-     * @Route("/create", name="article_create", methods={"POST"})
-     */
-    public function createAction(Request $request)
-    {
-        // dd("ok");
-        $data = $request->getContent();
-        $article = $this->get('jms_serializer')->deserialize($data, 'App\Entity\Article', 'json');
+    // /**
+    //  * @Route("/create", name="article_create", methods={"POST"})
+    //  */
+    // public function createAction(Request $request)
+    // {
+    //     // dd("ok");
+    //     $data = $request->getContent();
+    //     $article = $this->get('jms_serializer')->deserialize($data, 'App\Entity\Article', 'json');
 
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($article);
-        $em->flush();
+    //     $em = $this->getDoctrine()->getManager();
+    //     $em->persist($article);
+    //     $em->flush();
 
-        return new Response('', Response::HTTP_CREATED);
-    }
+    //     return new Response('', Response::HTTP_CREATED);
+    // }
 
     /**
      * @Route("/", name="app_articles_index", methods={"GET"})
@@ -87,19 +87,13 @@ class ArticlesController extends AbstractController
      */
     public function new(Request $request, ArticlesRepository $articlesRepository): Response
     {
+        $data = $request->getContent();
         $article = new Articles();
-        $form = $this->createForm(ArticlesType::class, $article);
-        $form->handleRequest($request);
+        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+        $articles = $serializer->deserialize($data, "App\Entity\Articles", "json");
+        $articlesRepository->add($articles);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $articlesRepository->add($article);
-            return $this->redirectToRoute('app_articles_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->renderForm('articles/new.html.twig', [
-            'article' => $article,
-            'form' => $form,
-        ]);
+        return new Response('', Response::HTTP_CREATED);
     }
 
     /**
