@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Token;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -36,15 +38,28 @@ class UserController extends AbstractController
     /**
      * @Route("/new", name="app_user_new", methods={"GET", "POST"})
      */
-    public function new(Request $request, UserRepository $userRepository): Response
+    public function new(Request $request, UserRepository $userRepository,ManagerRegistry $doctrine): Response
     {
-        $user = new User();
-        $data = $request->getContent();
-        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-        $user = $serializer->deserialize($data, "App\Entity\User", "json");
-        $userRepository->add($user);
+        $authorizationHeader = $request->headers->get('Authorization');
+        // dd($authorizationHeader);
+        if($authorizationHeader != null){
+            $user = new User();
+            $data = $request->getContent();
+            $dataDecode = json_decode($data, true);
+            // dd($dataDecode['password']);
+            $hashedPassword = password_hash($dataDecode['password'], PASSWORD_DEFAULT);
+            
+            $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+            $user = $serializer->deserialize($data, "App\Entity\User", "json");
+            $user->setPassword($hashedPassword);
+            $entityManager = $doctrine->getManager();
+            $entityManager->persist($user);
+            $entityManager->flush();
 
-        return new Response('', Response::HTTP_CREATED);
+            return new Response('', Response::HTTP_CREATED);
+        } else {
+            return new Response('', Response::HTTP_UNAUTHORIZED);
+        }
     }
 
     /**

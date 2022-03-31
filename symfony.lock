@@ -80,12 +80,6 @@
     "friendsofphp/proxy-manager-lts": {
         "version": "v1.0.7"
     },
-    "jms/metadata": {
-        "version": "2.6.1"
-    },
-    "jms/serializer": {
-        "version": "3.17.1"
-    },
     "laminas/laminas-code": {
         "version": "3.4.1"
     },
@@ -95,11 +89,26 @@
     "laminas/laminas-zendframework-bridge": {
         "version": "1.4.1"
     },
+    "lcobucci/jwt": {
+        "version": "3.4.6"
+    },
+    "lexik/jwt-authentication-bundle": {
+        "version": "2.14",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "2.5",
+            "ref": "5b2157bcd5778166a5696e42f552ad36529a07a6"
+        },
+        "files": [
+            "./config/packages/lexik_jwt_authentication.yaml"
+        ]
+    },
+    "namshi/jose": {
+        "version": "7.2.3"
+    },
     "nikic/php-parser": {
         "version": "v4.13.2"
-    },
-    "phpstan/phpdoc-parser": {
-        "version": "1.2.0"
     },
     "psr/cache": {
         "version": "1.0.1"
@@ -255,6 +264,9 @@
     "symfony/polyfill-mbstring": {
         "version": "v1.25.0"
     },
+    "symfony/polyfill-php56": {
+        "version": "v1.20.0"
+    },
     "symfony/polyfill-php73": {
         "version": "v1.25.0"
     },
@@ -289,11 +301,29 @@
     "symfony/runtime": {
         "version": "v5.4.5"
     },
+    "symfony/security-bundle": {
+        "version": "5.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "5.3",
+            "ref": "98f1f2b0d635908c2b40f3675da2d23b1a069d30"
+        },
+        "files": [
+            "./config/packages/security.yaml"
+        ]
+    },
     "symfony/security-core": {
         "version": "v5.4.5"
     },
     "symfony/security-csrf": {
         "version": "v5.4.3"
+    },
+    "symfony/security-guard": {
+        "version": "v5.4.3"
+    },
+    "symfony/security-http": {
+        "version": "v5.4.5"
     },
     "symfony/serializer": {
         "version": "v5.4.6"
