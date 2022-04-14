@@ -1,2 +1,11 @@
 api_login_check:
     path: /api/login_check
+    controller: Symfony\Bundle\FrameworkBundle\Controller\SecurityController
+
+# api_token_check:
+#     path: /api/token_check
+#     controller: Symfony\Bundle\FrameworkBundle\Controller\SecurityController
+#     defaults:
+#         # this value can be an absolute path or an absolute URL
+#         path: 'http://127.0.0.1/P7ElouanPeurou/P7ElouanPeurou/public/token_check'
+#         permanent: true

@@ -29,6 +29,20 @@ security:
                 # password_path: email
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
+                # default_target_path: api_token_check
+        # showuser:
+        #     pattern: ^/user/
+        #     # anonymous: true
+        #     stateless: true
+        #     guard: 
+        #         authenticators:
+        #             - lexik_jwt_authentication.jwt_token_authenticator
+        #     provider: app_user_provider
+        showuser:
+            provider: app_user_provider
+            pattern:   ^/user
+            stateless: true
+            jwt: ~
         api:
             provider: app_user_provider
             pattern:   ^/api
@@ -37,9 +51,9 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
-            lazy: true
-            provider: users_in_memory
+        # main:
+        #     lazy: true
+        #     provider: users_in_memory
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -52,6 +66,7 @@ security:
     access_control:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/user,       roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:
