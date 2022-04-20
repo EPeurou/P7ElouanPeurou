@@ -50,7 +50,8 @@ class UserController extends AbstractController
             $hashedPassword = password_hash($dataDecode['password'], PASSWORD_DEFAULT);
             
             $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-            $user = $serializer->deserialize($data, "App\Entity\User", "json");
+            $user = $this->get('serializer')->deserialize($data,"App\Entity\User", 'json');
+            // $user = $serializer->deserialize($data, "App\Entity\User", "json");
             $user->setPassword($hashedPassword);
             $entityManager = $doctrine->getManager();
             $entityManager->persist($user);
@@ -67,8 +68,9 @@ class UserController extends AbstractController
      */
     public function show(User $user): Response
     {
-        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-        $data = $serializer->serialize($user, "json");
+        // $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+        // $data = $serializer->serialize($user, "json");
+        $data = $this->get('serializer')->serialize($user, 'json');
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
 
