@@ -8,6 +8,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Hateoas\Configuration\Annotation as Hateoas;
 
+
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @Hateoas\Relation(
@@ -18,6 +19,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *          absolute = true
  *      )
  * )
+ * 
  * 
  * @Hateoas\Relation(
  *      "create",

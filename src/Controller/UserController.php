@@ -9,6 +9,7 @@ use App\Repository\UserRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Serializer\Serializer;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\HttpFoundation\Request;
@@ -66,11 +67,11 @@ class UserController extends AbstractController
     /**
      * @Route("/{id}", name="app_user_show", methods={"GET"})
      */
-    public function show(User $user): Response
+    public function show(User $user, SerializerInterface $serializerInterface): Response
     {
         // $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
         // $data = $serializer->serialize($user, "json");
-        $data = $this->get('serializer')->serialize($user, 'json');
+        $data = $serializerInterface->serialize($user, 'json');
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
 
