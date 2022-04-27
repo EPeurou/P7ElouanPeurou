@@ -12,6 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use JMS\Serializer\SerializerInterface;
 
 /**
  * @Route("/articles")
@@ -28,10 +29,11 @@ class ArticlesController extends AbstractController
     /**
      * @Route("/show/{id}", name="article_show")
      */
-    public function showAction(Articles $article)
+    public function showAction(Articles $article,SerializerInterface $serializerInterface)
     {
-        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-        $data = $serializer->serialize($article, "json");
+        // $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+        $data = $serializerInterface->serialize($article, 'json');
+        // $data = $serializer->serialize($article, "json");
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
 
@@ -57,12 +59,12 @@ class ArticlesController extends AbstractController
     /**
      * @Route("/", name="app_articles_index", methods={"GET"})
      */
-    public function index(ArticlesRepository $articlesRepository): Response
+    public function index(ArticlesRepository $articlesRepository,SerializerInterface $serializerInterface): Response
     {
         $article = $articlesRepository->findAll();
-
-        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-        $data = $serializer->serialize($article, "json");
+        // $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+        // $data = $serializer->serialize($article, "json");
+        $data = $serializerInterface->serialize($article, 'json');
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
 

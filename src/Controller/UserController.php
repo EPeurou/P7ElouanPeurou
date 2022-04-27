@@ -24,12 +24,11 @@ class UserController extends AbstractController
     /**
      * @Route("/", name="app_user_index", methods={"GET"})
      */
-    public function index(UserRepository $userRepository): Response
+    public function index(UserRepository $userRepository,SerializerInterface $serializerInterface): Response
     {
         $user = $userRepository->findAll();
 
-        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-        $data = $serializer->serialize($user, "json");
+        $data = $serializerInterface->serialize($user, 'json');
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
 
@@ -41,27 +40,26 @@ class UserController extends AbstractController
      */
     public function new(Request $request, UserRepository $userRepository,ManagerRegistry $doctrine): Response
     {
-        $authorizationHeader = $request->headers->get('Authorization');
-        // dd($authorizationHeader);
-        if($authorizationHeader != null){
-            $user = new User();
-            $data = $request->getContent();
-            $dataDecode = json_decode($data, true);
-            // dd($dataDecode['password']);
-            $hashedPassword = password_hash($dataDecode['password'], PASSWORD_DEFAULT);
-            
-            $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-            $user = $this->get('serializer')->deserialize($data,"App\Entity\User", 'json');
-            // $user = $serializer->deserialize($data, "App\Entity\User", "json");
-            $user->setPassword($hashedPassword);
-            $entityManager = $doctrine->getManager();
-            $entityManager->persist($user);
-            $entityManager->flush();
+        $user = new User();
+        $data = $request->getContent();
+        $dataDecode = json_decode($data, true);
+        // dd($dataDecode['password']);
+        $hashedPassword = password_hash($dataDecode['password'], PASSWORD_DEFAULT);
+        
+        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+        $user = $this->container->get('serializer')->deserialize($data,"App\Entity\User", 'json');
+        
+        // $user = $serializer->deserialize($data, "App\Entity\User", "json");
+        $user->setPassword($hashedPassword);
+        $entityManager = $doctrine->getManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
+        
 
-            return new Response('', Response::HTTP_CREATED);
-        } else {
-            return new Response('', Response::HTTP_UNAUTHORIZED);
-        }
+        return new Response('', Response::HTTP_CREATED);
+    
+        // return new Response('', Response::HTTP_UNAUTHORIZED);
+        
     }
 
     /**
@@ -98,7 +96,7 @@ class UserController extends AbstractController
     }
 
     /**
-     * @Route("/{id}", name="app_user_delete", methods={"POST"})
+     * @Route("/delete/{id}", name="app_user_delete", methods={"POST"})
      */
     public function delete(Request $request, User $user, UserRepository $userRepository): Response
     {
