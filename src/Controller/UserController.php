@@ -15,6 +15,8 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * @Route("/user")
@@ -24,11 +26,21 @@ class UserController extends AbstractController
     /**
      * @Route("/", name="app_user_index", methods={"GET"})
      */
-    public function index(UserRepository $userRepository,SerializerInterface $serializerInterface): Response
+    public function index(UserRepository $userRepository,SerializerInterface $serializerInterface,CacheInterface $cache): Response
     {
+        $strid = "";
         $user = $userRepository->findAll();
-
+        foreach ($user as $singleUser){
+            $ids = $singleUser->getId();
+            $strid .= $ids;
+        }
+        // dd($strid);
         $data = $serializerInterface->serialize($user, 'json');
+        $ToCache = $cache->get("data_index".$strid,function(ItemInterface $item) use($data){
+            $item->expiresAfter(3600);
+            // return $data;
+            return $data;
+        });
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
 
@@ -65,13 +77,20 @@ class UserController extends AbstractController
     /**
      * @Route("/{id}", name="app_user_show", methods={"GET"})
      */
-    public function show(User $user, SerializerInterface $serializerInterface): Response
+    public function show(User $user, SerializerInterface $serializerInterface, CacheInterface $cache): Response
     {
         // $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
         // $data = $serializer->serialize($user, "json");
+        $userName = $user->getUserIdentifier();
         $data = $serializerInterface->serialize($user, 'json');
+        
+        $ToCache = $cache->get("data_show".$userName,function(ItemInterface $item) use($data){
+            // return $data;
+            return $data;
+        });
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
+        
 
         return $response;
     }
