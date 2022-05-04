@@ -9,11 +9,14 @@ use App\Repository\UserRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Serializer\Serializer;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * @Route("/user")
@@ -23,12 +26,21 @@ class UserController extends AbstractController
     /**
      * @Route("/", name="app_user_index", methods={"GET"})
      */
-    public function index(UserRepository $userRepository): Response
+    public function index(UserRepository $userRepository,SerializerInterface $serializerInterface,CacheInterface $cache): Response
     {
+        $strid = "";
         $user = $userRepository->findAll();
-
-        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-        $data = $serializer->serialize($user, "json");
+        foreach ($user as $singleUser){
+            $ids = $singleUser->getId();
+            $strid .= $ids;
+        }
+        // dd($strid);
+        $data = $serializerInterface->serialize($user, 'json');
+        $ToCache = $cache->get("data_index".$strid,function(ItemInterface $item) use($data){
+            $item->expiresAfter(3600);
+            // return $data;
+            return $data;
+        });
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
 
@@ -40,37 +52,46 @@ class UserController extends AbstractController
      */
     public function new(Request $request, UserRepository $userRepository,ManagerRegistry $doctrine): Response
     {
-        $authorizationHeader = $request->headers->get('Authorization');
-        // dd($authorizationHeader);
-        if($authorizationHeader != null){
-            $user = new User();
-            $data = $request->getContent();
-            $dataDecode = json_decode($data, true);
-            // dd($dataDecode['password']);
-            $hashedPassword = password_hash($dataDecode['password'], PASSWORD_DEFAULT);
-            
-            $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-            $user = $serializer->deserialize($data, "App\Entity\User", "json");
-            $user->setPassword($hashedPassword);
-            $entityManager = $doctrine->getManager();
-            $entityManager->persist($user);
-            $entityManager->flush();
+        $user = new User();
+        $data = $request->getContent();
+        $dataDecode = json_decode($data, true);
+        // dd($dataDecode['password']);
+        $hashedPassword = password_hash($dataDecode['password'], PASSWORD_DEFAULT);
+        
+        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+        $user = $this->container->get('serializer')->deserialize($data,"App\Entity\User", 'json');
+        
+        // $user = $serializer->deserialize($data, "App\Entity\User", "json");
+        $user->setPassword($hashedPassword);
+        $entityManager = $doctrine->getManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
+        
 
-            return new Response('', Response::HTTP_CREATED);
-        } else {
-            return new Response('', Response::HTTP_UNAUTHORIZED);
-        }
+        return new Response('', Response::HTTP_CREATED);
+    
+        // return new Response('', Response::HTTP_UNAUTHORIZED);
+        
     }
 
     /**
      * @Route("/{id}", name="app_user_show", methods={"GET"})
      */
-    public function show(User $user): Response
+    public function show(User $user, SerializerInterface $serializerInterface, CacheInterface $cache): Response
     {
-        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-        $data = $serializer->serialize($user, "json");
+        // $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+        // $data = $serializer->serialize($user, "json");
+        $userName = $user->getUserIdentifier();
+        $data = $serializerInterface->serialize($user, 'json');
+        
+        $ToCache = $cache->get("data_show".$userName,function(ItemInterface $item) use($data){
+            $item->expiresAfter(3600);
+            // return $data;
+            return $data;
+        });
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
+        
 
         return $response;
     }
@@ -95,7 +116,7 @@ class UserController extends AbstractController
     }
 
     /**
-     * @Route("/{id}", name="app_user_delete", methods={"POST"})
+     * @Route("/delete/{id}", name="app_user_delete", methods={"POST"})
      */
     public function delete(Request $request, User $user, UserRepository $userRepository): Response
     {
