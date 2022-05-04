@@ -63,13 +63,17 @@ class UserController extends AbstractController
         
         // $user = $serializer->deserialize($data, "App\Entity\User", "json");
         $user->setPassword($hashedPassword);
-        $entityManager = $doctrine->getManager();
-        $entityManager->persist($user);
-        $entityManager->flush();
-        
-
-        return new Response('', Response::HTTP_CREATED);
-    
+        try{
+            $entityManager = $doctrine->getManager();
+            $entityManager->persist($user);
+            $entityManager->flush();
+            return new Response('', Response::HTTP_CREATED);
+        } catch(\Exception $e) {
+            $error = 'Erreur: le nom d\'utilisateur existe deja.';
+            $response = new Response(json_encode($error));
+            $response->headers->set('Content-Type', 'application/json');
+            return new Response(json_encode($error), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }    
         // return new Response('', Response::HTTP_UNAUTHORIZED);
         
     }
