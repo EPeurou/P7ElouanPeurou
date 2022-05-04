@@ -21,13 +21,6 @@ use Symfony\Contracts\Cache\ItemInterface;
  */
 class ArticlesController extends AbstractController
 {
-    // public $serializer = new Serializer();
-
-    // public function __constructor($serializer)
-    // {
-    //     $this->serializer = $serializer;
-    // }
-
     /**
      * @Route("/show/{id}", name="article_show")
      */
@@ -37,7 +30,8 @@ class ArticlesController extends AbstractController
         // dd($strid);
         $articlesId = $article->getId();
         $data = $serializerInterface->serialize($article, 'json');
-        $ToCache = $cache->get("data_articles_show".$articlesId,function() use($data){
+        $ToCache = $cache->get("data_articles_show".$articlesId,function(ItemInterface $item) use($data){
+            $item->expiresAfter(3600);
             // return $data;
             return $data;
         });
@@ -90,60 +84,5 @@ class ArticlesController extends AbstractController
         $response->headers->set('Content-Type', 'application/json');
 
         return $response;
-    }
-
-    // /**
-    //  * @Route("/new", name="app_articles_new", methods={"GET", "POST"})
-    //  */
-    // public function new(Request $request, ArticlesRepository $articlesRepository): Response
-    // {
-    //     $data = $request->getContent();
-    //     $article = new Articles();
-    //     $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-    //     $articles = $serializer->deserialize($data, "App\Entity\Articles", "json");
-    //     $articlesRepository->add($articles);
-
-    //     return new Response('', Response::HTTP_CREATED);
-    // }
-
-    /**
-     * @Route("/{id}", name="app_articles_show", methods={"GET"})
-     */
-    public function show(Articles $article): Response
-    {
-        return $this->render('articles/show.html.twig', [
-            'article' => $article,
-        ]);
-    }
-
-    /**
-     * @Route("/{id}/edit", name="app_articles_edit", methods={"GET", "POST"})
-     */
-    public function edit(Request $request, Articles $article, ArticlesRepository $articlesRepository): Response
-    {
-        $form = $this->createForm(ArticlesType::class, $article);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $articlesRepository->add($article);
-            return $this->redirectToRoute('app_articles_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->renderForm('articles/edit.html.twig', [
-            'article' => $article,
-            'form' => $form,
-        ]);
-    }
-
-    /**
-     * @Route("/{id}", name="app_articles_delete", methods={"POST"})
-     */
-    public function delete(Request $request, Articles $article, ArticlesRepository $articlesRepository): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$article->getId(), $request->request->get('_token'))) {
-            $articlesRepository->remove($article);
-        }
-
-        return $this->redirectToRoute('app_articles_index', [], Response::HTTP_SEE_OTHER);
     }
 }

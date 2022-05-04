@@ -85,6 +85,7 @@ class UserController extends AbstractController
         $data = $serializerInterface->serialize($user, 'json');
         
         $ToCache = $cache->get("data_show".$userName,function(ItemInterface $item) use($data){
+            $item->expiresAfter(3600);
             // return $data;
             return $data;
         });
