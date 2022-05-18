@@ -56,24 +56,39 @@ class UserController extends AbstractController
         $data = $request->getContent();
         $dataDecode = json_decode($data, true);
         // dd($dataDecode['password']);
-        $hashedPassword = password_hash($dataDecode['password'], PASSWORD_DEFAULT);
         
-        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-        $user = $this->container->get('serializer')->deserialize($data,"App\Entity\User", 'json');
-        
-        // $user = $serializer->deserialize($data, "App\Entity\User", "json");
-        $user->setPassword($hashedPassword);
-        try{
-            $entityManager = $doctrine->getManager();
-            $entityManager->persist($user);
-            $entityManager->flush();
-            return new Response('', Response::HTTP_CREATED);
-        } catch(\Exception $e) {
-            $error = 'Erreur: le nom d\'utilisateur existe deja.';
-            $response = new Response(json_encode($error));
-            $response->headers->set('Content-Type', 'application/json');
-            return new Response(json_encode($error), Response::HTTP_INTERNAL_SERVER_ERROR);
-        }    
+        if (!isset($dataDecode['userName'])) {
+            $error = 'Erreur: le champ nom d\'utilisateur n\'a pas ete transmit.';
+            return new Response(json_encode($error), Response::HTTP_BAD_REQUEST);
+        } elseif (!isset($dataDecode['password'])) {
+            $error = 'Erreur: le champ mot de passe n\'a pas ete transmit.';
+            return new Response(json_encode($error), Response::HTTP_BAD_REQUEST);
+        } elseif (isset($dataDecode['password']) && $dataDecode['password'] == "" || $dataDecode['password'] == null){
+            $error = 'Erreur: le champ mot de passe ne peut pas etre vide.';
+            return new Response(json_encode($error), Response::HTTP_BAD_REQUEST);
+        } elseif (isset($dataDecode['userName']) && $dataDecode['userName'] == "" || $dataDecode['userName'] == null) {
+            $error = 'Erreur: le champ nom d\'utilisateur ne peut pas etre vide.';
+            return new Response(json_encode($error), Response::HTTP_BAD_REQUEST);
+        } else {
+            $hashedPassword = password_hash($dataDecode['password'], PASSWORD_DEFAULT);
+            $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+            $user = $this->container->get('serializer')->deserialize($data,"App\Entity\User", 'json');
+            
+            // $user = $serializer->deserialize($data, "App\Entity\User", "json");
+            $user->setPassword($hashedPassword);
+            try{
+                $entityManager = $doctrine->getManager();
+                $entityManager->persist($user);
+                $entityManager->flush();
+                return new Response('', Response::HTTP_CREATED);
+            } catch(\Exception $e) {
+                $error = 'Erreur: le nom d\'utilisateur existe deja.';
+                $response = new Response(json_encode($error));
+                $response->headers->set('Content-Type', 'application/json');
+                return new Response(json_encode($error), Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+        }
+          
         // return new Response('', Response::HTTP_UNAUTHORIZED);
         
     }
