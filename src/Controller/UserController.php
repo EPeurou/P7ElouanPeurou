@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * @Route("/user")
@@ -55,20 +56,23 @@ class UserController extends AbstractController
         $user = new User();
         $data = $request->getContent();
         $dataDecode = json_decode($data, true);
-        // dd($dataDecode['password']);
         
         if (!isset($dataDecode['userName'])) {
-            $error = 'Erreur: le champ nom d\'utilisateur n\'a pas ete transmit.';
-            return new Response(json_encode($error), Response::HTTP_BAD_REQUEST);
+            return new JsonResponse([
+                'erreur' => 'le champ nom d\'utilisateur n\'a pas ete transmit.'
+            ], 400);
         } elseif (!isset($dataDecode['password'])) {
-            $error = 'Erreur: le champ mot de passe n\'a pas ete transmit.';
-            return new Response(json_encode($error), Response::HTTP_BAD_REQUEST);
+            return new JsonResponse([
+                'erreur' => 'le champ mot de passe n\'a pas ete transmit.'
+            ], 400);
         } elseif (isset($dataDecode['password']) && $dataDecode['password'] == "" || $dataDecode['password'] == null){
-            $error = 'Erreur: le champ mot de passe ne peut pas etre vide.';
-            return new Response(json_encode($error), Response::HTTP_BAD_REQUEST);
+            return new JsonResponse([
+                'erreur' => 'le champ mot de passe ne peut pas etre vide.'
+            ], 400);
         } elseif (isset($dataDecode['userName']) && $dataDecode['userName'] == "" || $dataDecode['userName'] == null) {
-            $error = 'Erreur: le champ nom d\'utilisateur ne peut pas etre vide.';
-            return new Response(json_encode($error), Response::HTTP_BAD_REQUEST);
+            return new JsonResponse([
+                'erreur' => 'le champ nom d\'utilisateur ne peut pas etre vide.'
+            ], 400);
         } else {
             $hashedPassword = password_hash($dataDecode['password'], PASSWORD_DEFAULT);
             $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
@@ -82,10 +86,9 @@ class UserController extends AbstractController
                 $entityManager->flush();
                 return new Response('', Response::HTTP_CREATED);
             } catch(\Exception $e) {
-                $error = 'Erreur: le nom d\'utilisateur existe deja.';
-                $response = new Response(json_encode($error));
-                $response->headers->set('Content-Type', 'application/json');
-                return new Response(json_encode($error), Response::HTTP_INTERNAL_SERVER_ERROR);
+                return new JsonResponse([
+                    'erreur' => 'le nom d\'utilisateur existe deja.'
+                ], 500);
             }
         }
           
