@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Serializer\Serializer;
 use JMS\Serializer\SerializerInterface;
@@ -59,19 +60,23 @@ class UserController extends AbstractController
         
         if (!isset($dataDecode['userName'])) {
             return new JsonResponse([
-                'erreur' => 'le champ nom d\'utilisateur n\'a pas ete transmit.'
+                'code' => 400,
+                'error' => 'The username field is not in your request.'
             ], 400);
         } elseif (!isset($dataDecode['password'])) {
             return new JsonResponse([
-                'erreur' => 'le champ mot de passe n\'a pas ete transmit.'
+                'code' => 400,
+                'error' => 'The password field is not in your request.'
             ], 400);
         } elseif (isset($dataDecode['password']) && $dataDecode['password'] == "" || $dataDecode['password'] == null){
             return new JsonResponse([
-                'erreur' => 'le champ mot de passe ne peut pas etre vide.'
+                'code' => 400,
+                'error' => 'The password field can\'t be empty.'
             ], 400);
         } elseif (isset($dataDecode['userName']) && $dataDecode['userName'] == "" || $dataDecode['userName'] == null) {
             return new JsonResponse([
-                'erreur' => 'le champ nom d\'utilisateur ne peut pas etre vide.'
+                'code' => 400,
+                'error' => 'The username field can\'t be empty.'
             ], 400);
         } else {
             $hashedPassword = password_hash($dataDecode['password'], PASSWORD_DEFAULT);
@@ -87,7 +92,8 @@ class UserController extends AbstractController
                 return new Response('', Response::HTTP_CREATED);
             } catch(\Exception $e) {
                 return new JsonResponse([
-                    'erreur' => 'le nom d\'utilisateur existe deja.'
+                    'code' => 500,
+                    'error' => 'The username already exist.'
                 ], 500);
             }
         }
@@ -114,7 +120,6 @@ class UserController extends AbstractController
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
         
-
         return $response;
     }
 
