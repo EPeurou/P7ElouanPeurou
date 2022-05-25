@@ -43,22 +43,6 @@ class ArticlesController extends AbstractController
         return $response;
     }
 
-    // /**
-    //  * @Route("/create", name="article_create", methods={"POST"})
-    //  */
-    // public function createAction(Request $request)
-    // {
-    //     // dd("ok");
-    //     $data = $request->getContent();
-    //     $article = $this->get('jms_serializer')->deserialize($data, 'App\Entity\Article', 'json');
-
-    //     $em = $this->getDoctrine()->getManager();
-    //     $em->persist($article);
-    //     $em->flush();
-
-    //     return new Response('', Response::HTTP_CREATED);
-    // }
-
     /**
      * @Route("/", name="app_articles_index", methods={"GET"})
      */

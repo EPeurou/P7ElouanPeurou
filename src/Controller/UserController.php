@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Serializer\Serializer;
 use JMS\Serializer\SerializerInterface;
@@ -17,6 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * @Route("/user")
@@ -55,21 +57,47 @@ class UserController extends AbstractController
         $user = new User();
         $data = $request->getContent();
         $dataDecode = json_decode($data, true);
-        // dd($dataDecode['password']);
-        $hashedPassword = password_hash($dataDecode['password'], PASSWORD_DEFAULT);
         
-        $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
-        $user = $this->container->get('serializer')->deserialize($data,"App\Entity\User", 'json');
-        
-        // $user = $serializer->deserialize($data, "App\Entity\User", "json");
-        $user->setPassword($hashedPassword);
-        $entityManager = $doctrine->getManager();
-        $entityManager->persist($user);
-        $entityManager->flush();
-        
-
-        return new Response('', Response::HTTP_CREATED);
-    
+        if (!isset($dataDecode['userName'])) {
+            return new JsonResponse([
+                'code' => 400,
+                'error' => 'The username field is not in your request.'
+            ], 400);
+        } elseif (!isset($dataDecode['password'])) {
+            return new JsonResponse([
+                'code' => 400,
+                'error' => 'The password field is not in your request.'
+            ], 400);
+        } elseif (isset($dataDecode['password']) && $dataDecode['password'] == "" || $dataDecode['password'] == null){
+            return new JsonResponse([
+                'code' => 400,
+                'error' => 'The password field can\'t be empty.'
+            ], 400);
+        } elseif (isset($dataDecode['userName']) && $dataDecode['userName'] == "" || $dataDecode['userName'] == null) {
+            return new JsonResponse([
+                'code' => 400,
+                'error' => 'The username field can\'t be empty.'
+            ], 400);
+        } else {
+            $hashedPassword = password_hash($dataDecode['password'], PASSWORD_DEFAULT);
+            $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
+            $user = $this->container->get('serializer')->deserialize($data,"App\Entity\User", 'json');
+            
+            // $user = $serializer->deserialize($data, "App\Entity\User", "json");
+            $user->setPassword($hashedPassword);
+            try{
+                $entityManager = $doctrine->getManager();
+                $entityManager->persist($user);
+                $entityManager->flush();
+                return new Response('', Response::HTTP_CREATED);
+            } catch(\Exception $e) {
+                return new JsonResponse([
+                    'code' => 500,
+                    'error' => 'The username already exist.'
+                ], 500);
+            }
+        }
+          
         // return new Response('', Response::HTTP_UNAUTHORIZED);
         
     }
@@ -92,7 +120,6 @@ class UserController extends AbstractController
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
         
-
         return $response;
     }
 
