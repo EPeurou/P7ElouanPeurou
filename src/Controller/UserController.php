@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+
 use App\Entity\Token;
 use App\Entity\User;
 use App\Form\UserType;
@@ -19,6 +20,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
 
 /**
  * @Route("/user")
@@ -27,6 +31,24 @@ class UserController extends AbstractController
 {
     /**
      * @Route("/", name="app_user_index", methods={"GET"})
+     * @OA\Response(
+     *     response=200,
+     *     description="Returns the list of users",
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=User::class, groups={"full"})),
+     *        example={
+     *        "id": 4,
+     *        "username": "jean",
+     *        "roles": "",
+     *        "password": "$2y$13$kylP7xftPMN9DexwiOP03ON.DYqzLlGZ6LzXbl.YmUI3G0MYE6.ha",
+     *         "links": "all links to other routes for this user"        
+     *        }
+     *     )
+     *     
+     * )
+     * @OA\Tag(name="User")
+     * @Security(name="Bearer")
      */
     public function index(UserRepository $userRepository,SerializerInterface $serializerInterface,CacheInterface $cache): Response
     {
@@ -50,7 +72,27 @@ class UserController extends AbstractController
     }
 
     /**
-     * @Route("/new", name="app_user_new", methods={"GET", "POST"})
+     * @Route("/new", name="app_user_new", methods={"POST"})
+     * @OA\Response(
+     *     response=201,
+     *     description="Created",
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=User::class, groups={"full"}))
+     *     )  
+     * )
+     * @OA\Parameter(
+     *     name="body",
+     *     in="query",
+     *     description="Create a new user",
+     *     example={
+     *      "userName": "username",
+     *      "password": "password"
+     *   },
+     *     
+     * )
+     * @OA\Tag(name="User")
+     * @Security(name="Bearer")
      */
     public function new(Request $request, UserRepository $userRepository,ManagerRegistry $doctrine): Response
     {
@@ -104,6 +146,24 @@ class UserController extends AbstractController
 
     /**
      * @Route("/{id}", name="app_user_show", methods={"GET"})
+     * @OA\Response(
+     *     response=200,
+     *     description="Return a user",
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=User::class, groups={"full"})),
+     *        example={
+     *        "id": 5,
+     *        "username": "tim",
+     *        "roles": "",
+     *        "password": "$2y$13$kylP7xftPMN9DexwiOP03ON.DYqzLlGZ6LzXbl.YmUI3G0MYE6.ha",
+     *         "links": "all links to other routes for this user"        
+     *        }
+     *     )
+     *     
+     * )
+     * @OA\Tag(name="User")
+     * @Security(name="Bearer")
      */
     public function show(User $user, SerializerInterface $serializerInterface, CacheInterface $cache): Response
     {
@@ -124,26 +184,13 @@ class UserController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/edit", name="app_user_edit", methods={"GET", "POST"})
-     */
-    public function edit(Request $request, User $user, UserRepository $userRepository): Response
-    {
-        $form = $this->createForm(UserType::class, $user);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $userRepository->add($user);
-            return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->renderForm('user/edit.html.twig', [
-            'user' => $user,
-            'form' => $form,
-        ]);
-    }
-
-    /**
      * @Route("/delete/{id}", name="app_user_delete", methods={"POST"})
+     * @OA\Response(
+     *     response=200,
+     *     description="Delete a user",
+     * )
+     * @OA\Tag(name="User")
+     * @Security(name="Bearer")
      */
     public function delete(Request $request, User $user, UserRepository $userRepository): Response
     {
