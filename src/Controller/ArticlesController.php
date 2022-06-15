@@ -15,6 +15,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
 
 /**
  * @Route("/articles")
@@ -22,7 +25,25 @@ use Symfony\Contracts\Cache\ItemInterface;
 class ArticlesController extends AbstractController
 {
     /**
-     * @Route("/show/{id}", name="article_show")
+     * @Route("/show/{id}", name="article_show",methods={"GET"})
+     * @OA\Response(
+     *     response=200,
+     *     description="Return a single article",
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=Articles::class, groups={"full"})),
+     *        example={
+     *        "id": 1,
+     *         "brand": "apple",
+     *         "model": "iphone 8",
+     *         "price": 1200.0,
+     *         "links": "all links to other routes for this article"        
+     *        }
+     *     )
+     *     
+     * )
+     * @OA\Tag(name="Article")
+     * @Security(name="Bearer")
      */
     public function showAction(Articles $article,SerializerInterface $serializerInterface,CacheInterface $cache)
     {
@@ -45,6 +66,24 @@ class ArticlesController extends AbstractController
 
     /**
      * @Route("/", name="app_articles_index", methods={"GET"})
+     * @OA\Response(
+     *     response=200,
+     *     description="Returns the list of articles",
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=Articles::class, groups={"full"})),
+     *        example={
+     *         "id": 1,
+     *         "brand": "apple",
+     *         "model": "iphone 28",
+     *         "price": 1200.0,
+     *         "links": "all links to other routes for this article"        
+     *        }
+     *     )
+     *     
+     * )
+     * @OA\Tag(name="Article")
+     * @Security(name="Bearer")
      */
     public function index(ArticlesRepository $articlesRepository,SerializerInterface $serializerInterface,CacheInterface $cache): Response
     {

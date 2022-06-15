@@ -127,8 +127,30 @@
     "namshi/jose": {
         "version": "7.2.3"
     },
+    "nelmio/api-doc-bundle": {
+        "version": "4.9",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "3.0",
+            "ref": "c8e0c38e1a280ab9e37587a8fa32b251d5bc1c94"
+        },
+        "files": [
+            "./config/packages/nelmio_api_doc.yaml",
+            "./config/routes/nelmio_api_doc.yaml"
+        ]
+    },
     "nikic/php-parser": {
         "version": "v4.13.2"
+    },
+    "phpdocumentor/reflection-common": {
+        "version": "2.2.0"
+    },
+    "phpdocumentor/reflection-docblock": {
+        "version": "5.3.0"
+    },
+    "phpdocumentor/type-resolver": {
+        "version": "1.6.1"
     },
     "phpstan/phpdoc-parser": {
         "version": "1.4.4"
@@ -168,6 +190,9 @@
         "files": [
             "./public/.htaccess"
         ]
+    },
+    "symfony/asset": {
+        "version": "v5.4.7"
     },
     "symfony/cache": {
         "version": "v5.4.6"
@@ -416,6 +441,9 @@
     "twig/twig": {
         "version": "v3.3.8"
     },
+    "webmozart/assert": {
+        "version": "1.10.0"
+    },
     "willdurand/hateoas": {
         "version": "3.8.0"
     },
@@ -430,5 +458,8 @@
         "files": [
             "./config/packages/bazinga_hateoas.yaml"
         ]
+    },
+    "zircote/swagger-php": {
+        "version": "4.4.2"
     }
 }
