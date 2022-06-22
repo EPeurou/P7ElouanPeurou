@@ -49,6 +49,11 @@ security:
             pattern:   ^/articles
             stateless: true
             jwt: ~
+        showcustomer:
+            provider: app_user_provider
+            pattern:   ^/customer
+            stateless: true
+            jwt: ~
         api:
             provider: app_user_provider
             pattern:   ^/api
@@ -75,6 +80,7 @@ security:
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/user,       roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/articles,       roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/customer,       roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:
