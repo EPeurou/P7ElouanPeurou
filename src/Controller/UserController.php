@@ -3,9 +3,7 @@
 namespace App\Controller;
 
 
-use App\Entity\Token;
 use App\Entity\User;
-use App\Form\UserType;
 use App\Repository\UserRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
@@ -50,8 +48,10 @@ class UserController extends AbstractController
      * @OA\Tag(name="User")
      * @Security(name="Bearer")
      */
-    public function index(UserRepository $userRepository,SerializerInterface $serializerInterface,CacheInterface $cache): Response
+    public function index(Request $request,UserRepository $userRepository,SerializerInterface $serializerInterface,CacheInterface $cache): Response
     {
+        // $data = $request->getContent();
+        // dd($data);
         $strid = "";
         $user = $userRepository->findAll();
         foreach ($user as $singleUser){
