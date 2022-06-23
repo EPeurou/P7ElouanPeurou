@@ -24,6 +24,7 @@ use Nelmio\ApiDocBundle\Annotation\Security;
 use OpenApi\Annotations as OA;
 use PhpParser\Node\Expr\Cast\Int_;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
+use Doctrine\ORM\Query\ResultSetMapping;
 
 /**
  * @Route("/customer")
@@ -77,7 +78,7 @@ class CustomerController extends AbstractController
     /**
      * @Route("/show/{id}", name="app_customer_show", methods={"POST"})
      */
-    public function show(Customer $customer, SerializerInterface $serializerInterface, CacheInterface $cache, Request $request,CustomerRepository $customerRepository, int $id): Response
+    public function show(Customer $customer, SerializerInterface $serializerInterface, CacheInterface $cache, Request $request,CustomerRepository $customerRepository, int $id, ManagerRegistry $doctrine): Response
     {
         $body = $request->getContent();
         $bodyDecode = json_decode($body, true);
@@ -92,17 +93,16 @@ class CustomerController extends AbstractController
                 'error' => 'The iduser field is empty.'
             ], 400);
         }
+        // $userObj = $customerRepository->findByExampleField($id);
+        
         $userObj = $customerRepository->findOneBy(['idUser' =>$bodyDecode["iduser"],'id'=>$id]);
-        // dd($userObj);
+        
         // $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
         // $data = $serializer->serialize($user, "json");
         $userName = $customer->getUserName();
-        // $getIdUser = $customer->getIdUser();
         if ($userObj != null){
-            // dd($getIdUser);
-        // unset($customer->idUser);
-
-            $data = $serializerInterface->serialize($customer, 'json');
+            
+            $data = $serializerInterface->serialize($userObj, 'json');
             
             $ToCache = $cache->get("data_show".$userName,function(ItemInterface $item) use($data){
                 $item->expiresAfter(3600);

@@ -13,7 +13,7 @@ nelmio_api_doc:
         #             type: apiKey
         #             in: header
         #             name: Bearer # or another header name
-    areas: # to filter documented areas
+    #areas: # to filter documented areas
         # path_patterns:
         #     - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
     
