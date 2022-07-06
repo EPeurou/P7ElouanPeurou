@@ -32,25 +32,15 @@ use Doctrine\ORM\Query\ResultSetMapping;
 class CustomerController extends AbstractController
 {
     /**
-     * @Route("/", name="app_customer", methods={"POST"})
+     * @Route("/", name="app_customer", methods={"GET"})
      */
     public function index(Request $request,CustomerRepository $customerRepository,SerializerInterface $serializerInterface,CacheInterface $cache): Response
     {
+        $getuser = $this->getUser();
         $body = $request->getContent();
         $bodyDecode = json_decode($body, true);
-        if (!isset($bodyDecode['iduser'])) {
-            return new JsonResponse([
-                'code' => 400,
-                'error' => 'The iduser field is not in your request.'
-            ], 400);
-        } elseif (isset($bodyDecode['iduser']) && $bodyDecode['iduser'] == "" || $bodyDecode['iduser'] == null) {
-            return new JsonResponse([
-                'code' => 400,
-                'error' => 'The iduser field is empty.'
-            ], 400);
-        }
         $strid = "";
-        $customer = $customerRepository->findBy(['idUser' =>$bodyDecode["iduser"]]);
+        $customer = $customerRepository->findBy(['idUser' =>$getuser]);
         if ($customer != null){
             foreach ($customer as $singleUser){
                 $ids = $singleUser->getId();
@@ -70,32 +60,22 @@ class CustomerController extends AbstractController
         } else {
             return new JsonResponse([
                 'code' => 404,
-                'error' => 'The iduser field is incorrect.'
+                'error' => 'Any customer for this user.'
             ], 404);
         }     
     }
 
     /**
-     * @Route("/show/{id}", name="app_customer_show", methods={"POST"})
+     * @Route("/show/{id}", name="app_customer_show", methods={"GET"})
      */
     public function show(Customer $customer, SerializerInterface $serializerInterface, CacheInterface $cache, Request $request,CustomerRepository $customerRepository, int $id, ManagerRegistry $doctrine): Response
     {
+        $getuser = $this->getUser();
         $body = $request->getContent();
         $bodyDecode = json_decode($body, true);
-        if (!isset($bodyDecode['iduser'])) {
-            return new JsonResponse([
-                'code' => 400,
-                'error' => 'The iduser field is not in your request.'
-            ], 400);
-        } elseif (isset($bodyDecode['iduser']) && $bodyDecode['iduser'] == "" || $bodyDecode['iduser'] == null) {
-            return new JsonResponse([
-                'code' => 400,
-                'error' => 'The iduser field is empty.'
-            ], 400);
-        }
         // $userObj = $customerRepository->findByExampleField($id);
         
-        $userObj = $customerRepository->findOneBy(['idUser' =>$bodyDecode["iduser"],'id'=>$id]);
+        $userObj = $customerRepository->findOneBy(['idUser' =>$getuser,'id'=>$id]);
         
         // $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
         // $data = $serializer->serialize($user, "json");
@@ -120,7 +100,7 @@ class CustomerController extends AbstractController
         } else {
             return new JsonResponse([
                 'code' => 404,
-                'error' => 'The iduser field is incorrect.'
+                'error' => 'The customer does not exist for this user.'
             ], 404);
         }        
     }
@@ -129,11 +109,11 @@ class CustomerController extends AbstractController
      */
     public function new(UserRepository $userRepository,Request $request,ManagerRegistry $doctrine): Response
     {
+        $getuser = $this->getUser();
         $customer = new Customer();
         $data = $request->getContent();
         $dataDecode = json_decode($data, true);
         // dd($userObj);
-        
         if (!isset($dataDecode['userName'])) {
             return new JsonResponse([
                 'code' => 400,
@@ -143,11 +123,6 @@ class CustomerController extends AbstractController
             return new JsonResponse([
                 'code' => 400,
                 'error' => 'The password field is not in your request.'
-            ], 400);
-        } elseif (!isset($dataDecode['iduser'])) {
-            return new JsonResponse([
-                'code' => 400,
-                'error' => 'The iduser field is not in your request.'
             ], 400);
         } elseif (isset($dataDecode['password']) && $dataDecode['password'] == "" || $dataDecode['password'] == null){
             return new JsonResponse([
@@ -159,19 +134,13 @@ class CustomerController extends AbstractController
                 'code' => 400,
                 'error' => 'The username field is empty.'
             ], 400);
-        } elseif (isset($dataDecode['iduser']) && $dataDecode['iduser'] == "" || $dataDecode['iduser'] == null) {
-                return new JsonResponse([
-                    'code' => 400,
-                    'error' => 'The iduser field is empty.'
-                ], 400);
         } else {
-            $userObj = $userRepository->findOneBy(['id' => $dataDecode["iduser"]]);
+            $userObj = $userRepository->findOneBy(['id' => $getuser]);
             if($userObj != null){
                 $hashedPassword = password_hash($dataDecode['password'], PASSWORD_DEFAULT);
                 $serializer = new Serializer(array(new ObjectNormalizer()), array(new JsonEncoder()));
                 $customer = $this->container->get('serializer')->deserialize($data,"App\Entity\Customer", 'json');
-                
-                // $user = $serializer->deserialize($data, "App\Entity\User", "json");
+                //$user = $serializer->deserialize($data, "App\Entity\User", "json");
                 $customer->setPassword($hashedPassword);
                 $customer->setIdUser($userObj);
                 try{
@@ -196,7 +165,7 @@ class CustomerController extends AbstractController
     }
     
     /**
-     * @Route("/delete/{id}", name="app_customer_delete", methods={"POST"})
+     * @Route("/delete/{id}", name="app_customer_delete", methods={"DELETE"})
      * @OA\Response(
      *     response=200,
      *     description="Delete a user",
@@ -206,6 +175,7 @@ class CustomerController extends AbstractController
      */
     public function delete(Request $request, Customer $customer, CustomerRepository $customerRepository,Int $id): Response
     {
+        $getuser = $this->getUser();
         $body = $request->getContent();
         $bodyDecode = json_decode($body, true);
         if (!isset($bodyDecode['iduser'])) {
@@ -219,7 +189,7 @@ class CustomerController extends AbstractController
                 'error' => 'The iduser field is empty.'
             ], 400);
         }
-        $userObj = $customerRepository->findOneBy(['idUser' =>$bodyDecode["iduser"],'id'=>$id]);
+        $userObj = $customerRepository->findOneBy(['idUser' =>$getuser,'id'=>$id]);
         if ($userObj != null){
                 $customerRepository->remove($customer);
             
