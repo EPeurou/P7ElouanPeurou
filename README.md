@@ -1,5 +1,9 @@
 ## Instruction d'installation du projet
 
+### Versions
+PHP: 7.3.7
+Symfony: 5.4
+
 ### Installation sur un serveur local
 
 Pour installer le projet sur un serveur local il faut placer le dossier contenant le code dans le dossier qui contient les autres applications fonctionnant sur le serveur.
