@@ -38,9 +38,3 @@ Voici des identifiants qui vous permettront de tester l'api(à utiliser dans le 
 ##### nom d'utilisateur: main
 ##### mot de passe: test
 
-Les requêtes relative à l'entité Customer néssecitent l'id de l'utilisateur(User) à ajouter dans le corps des requêtes comme ceci(l'id de l'utilisateur fourni si dessus est 7):
-
-    {
-        "iduser": "7"
-    }
-
