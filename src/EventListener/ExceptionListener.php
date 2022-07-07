@@ -18,7 +18,7 @@ class ExceptionListener
             $exception->getMessage(),
             $exception->getCode()
         );
-       $code= $exception->getCode();
+        $code= $exception->getStatusCode();
         // Customize your response object to display the exception details
         $response = new JsonResponse([
             'code' => $code,
