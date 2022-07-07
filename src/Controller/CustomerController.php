@@ -158,7 +158,7 @@ class CustomerController extends AbstractController
             } else {
                 return new JsonResponse([
                     'code' => 404,
-                    'error' => 'The iduser field is incorrect.'
+                    'error' => 'This user does not exist.'
                 ], 404);
             }
         }
@@ -178,17 +178,7 @@ class CustomerController extends AbstractController
         $getuser = $this->getUser();
         $body = $request->getContent();
         $bodyDecode = json_decode($body, true);
-        if (!isset($bodyDecode['iduser'])) {
-            return new JsonResponse([
-                'code' => 400,
-                'error' => 'The iduser field is not in your request.'
-            ], 400);
-        } elseif (isset($bodyDecode['iduser']) && $bodyDecode['iduser'] == "" || $bodyDecode['iduser'] == null) {
-            return new JsonResponse([
-                'code' => 400,
-                'error' => 'The iduser field is empty.'
-            ], 400);
-        }
+    
         $userObj = $customerRepository->findOneBy(['idUser' =>$getuser,'id'=>$id]);
         if ($userObj != null){
                 $customerRepository->remove($customer);
@@ -197,7 +187,7 @@ class CustomerController extends AbstractController
         } else {
             return new JsonResponse([
                 'code' => 404,
-                'error' => 'The iduser field is incorrect.'
+                'error' => 'The customer does not exist for this user.'
             ], 404);
         }       
     }
